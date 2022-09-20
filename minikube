@@ -1,0 +1,65 @@
+;Minikube Installation script
+
+platform: virtualbox
+os: ubuntu 20 LTS
+min sys req: cpu: 2 , ram: 4 GB
+
+
+script 1: run as root
+
+#!/bin/bash
+apt-get update -y
+sleep 2
+apt-get upgrade -y
+sleep 2
+# install prerequisites
+apt -y install curl apt-transport-https virtualbox virtualbox-ext-pack
+sleep 2
+# install kubectl
+curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add
+sleep 2
+apt-add-repository "deb http://apt.kubernetes.io/ kubernetes-xenial main"
+sleep 3
+apt -y update
+apt install kubectl -y
+sleep 2
+apt-mark hold kubectl
+sleep 2
+# install docker for virtualization driver support
+apt -y install docker.io 
+systemctl restart docker
+sleep 2
+systemctl enable docker
+sleep 2
+# install minikube
+wget https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+sleep 2
+cp -v minikube-linux-amd64 /usr/local/bin/minikube
+chmod 755 /usr/local/bin/minikube
+
+
+
+script 2: run with regular user without sudo
+
+#!/bin/bash
+# start minikube
+sudo usermod -aG docker $USER && newgrp docker
+id $USER
+minikube start driver=docker
+
+# post-installation: verify - not to be included in script
+minikube version
+kubectl version -o json
+kubectl config view
+kubectl cluster-info
+kubectl get nodes
+kubectl get pod
+minikube status
+
+
+
+
+
+
+
+
